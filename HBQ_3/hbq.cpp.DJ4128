@@ -1,0 +1,766 @@
+#include "hbq.h"
+#include "ui_hbq.h"
+#include "widget.h"
+#include <QPainter>
+#include <QHeaderView>
+#include <QLabel>
+#include <QPixmap>
+#include <QLineEdit>
+#include <QDebug>
+#include <QMouseEvent>
+#include <QTableWidgetItem>
+#include <QPalette>
+#include <stdio.h>
+#include <unistd.h>
+#include <QString>
+QLabel *label[8][8];
+int state[8][8]={{0,0,0,0,0,0,0,0},
+                 {0,0,0,0,0,0,0,0},
+                 {0,0,0,0,0,0,0,0},
+                 {0,0,0,1,2,0,0,0},
+                 {0,0,0,2,1,0,0,0},
+                 {0,0,0,0,0,0,0,0},
+                 {0,0,0,0,0,0,0,0},
+                 {0,0,0,0,0,0,0,0}}; //黑棋为1,白棋为2
+int flag=0;
+
+int get[16];
+int hei=2;
+int bai=2;
+HBQ::HBQ(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::HBQ)
+{
+    ui->setupUi(this);
+
+    QPixmap pixp1;
+    pixp1.load(":/image/black.png");
+    ui->label_p1->setScaledContents(true);
+    ui->label_p1->setPixmap(pixp1);
+
+    QPixmap pixp2;
+    pixp2.load(":/image/white.png");
+    ui->label_p2->setScaledContents(true);
+    ui->label_p2->setPixmap(pixp2);
+
+    ui->label_2->setText(QString::number(hei));
+    ui->label_4->setText(QString::number(bai));
+
+
+
+
+    QPalette palette;
+    QPixmap pixmap(":/image/bg2.jpg");
+    palette.setBrush(QPalette::Window, QBrush(pixmap));
+    HBQ::setPalette(palette);
+
+    this->resize(700, 500);
+    ui->tableWidget->horizontalHeader()->setVisible(false); //去掉表格的行首
+    ui->tableWidget->verticalHeader()->setVisible(false);  //去掉列首
+
+
+    QPixmap pix;
+    pix.load(":/image/black.png");
+    QPixmap pix1;
+    pix1.load(":/image/white.png");
+
+
+    label[3][3]=new QLabel;
+    label[3][3]->setPixmap(pix);
+    label[3][3]->setScaledContents(true);
+
+    label[3][4]=new QLabel;
+    label[3][4]->setPixmap(pix1);
+    label[3][4]->setScaledContents(true);
+
+    label[4][3]=new QLabel;
+    label[4][3]->setPixmap(pix1);
+    label[4][3]->setScaledContents(true);
+
+    label[4][4]=new QLabel;
+    label[4][4]->setPixmap(pix);
+    label[4][4]->setScaledContents(true);
+
+    ui->tableWidget->setCellWidget(3, 3, label[3][3]);
+    ui->tableWidget->setCellWidget(3, 4, label[3][4]);
+    ui->tableWidget->setCellWidget(4, 3, label[4][3]);
+    ui->tableWidget->setCellWidget(4, 4, label[4][4]);
+
+
+}
+
+void HBQ::mousePressEvent(QMouseEvent *ev)
+{
+
+    int i=(ev->y()-20)/50;
+    int j=(ev->x()-20)/50;
+    qDebug() << "i="<< i <<"j="<<j;
+
+
+     if(flag==0 && state[i][j]==0)
+     {
+         //黑
+        usleep(1);
+         HBQ::shang(i,j);  //判断上边函数
+         HBQ::xia(i,j);    //判断下边函数
+         HBQ::zuo(i,j);    //判断左边函数
+         HBQ::you(i,j);    //判断右边函数
+         HBQ::zuoshang(i,j); //判断左上函数
+         HBQ::zuoxia(i,j); //判断左下函数
+         HBQ::youshang(i,j); //判断右上函数
+         HBQ::youxia(i,j); //判断右下函数
+
+        if(state[i][j]==0)             //如果点击此位置，此位置不能下，所以将flag置0重新下黑棋
+             flag=0;
+        else
+         {
+             state[i][j]=1;
+             flag=1;
+         }
+
+
+     }
+     else if(flag==1 && state[i][j]==0)
+     {
+
+         //白
+          usleep(1);
+         HBQ::bshang(i,j);  //判断上边函数
+         HBQ::bxia(i,j);    //判断下边函数
+         HBQ::bzuo(i,j);    //判断左边函数
+         HBQ::byou(i,j);    //判断右边函数
+         HBQ::bzuoshang(i,j); //判断左上函数
+         HBQ::bzuoxia(i,j); //判断左下函数
+         HBQ::byoushang(i,j); //判断右上函数
+         HBQ::byouxia(i,j);//判断右下函数
+
+        if(state[i][j]==0)                  //如果点击此位置，此位置不能下，所以将flag置1重新下白棋
+        {
+            flag=1;
+        }
+        else
+        {
+            state[i][j]=2;
+            flag=0;
+        }
+     }
+
+
+
+}
+
+
+int HBQ::xia(int &i, int &j)
+{
+    if(state[i+1][j]==2)
+    {
+
+          for(int upx=i+1;upx<=7;upx++)
+          {
+
+              if(state[upx][j]==0)
+                  break;
+              if(state[upx][j]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+
+
+                  for(int k=1;k<upx-i;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i+k][j]=new QLabel;
+                          label[i+k][j]->setPixmap(pix1);
+                          label[i+k][j]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j, label[i+k][j]);
+                          state[i+k][j]=1;
+                    }
+              }
+          }
+    }
+}
+
+int HBQ::zuo(int &i, int &j)
+{
+    if(state[i][j-1]==2)
+    {
+          for(int upx=j-1;upx>=0;upx--)
+          {
+
+              if(state[i][upx]==0)
+                  break;
+              if(state[i][upx]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1;k<j-upx;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i][j-k]=new QLabel;
+                          label[i][j-k]->setPixmap(pix1);
+                          label[i][j-k]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i, j-k, label[i][j-k]);
+                          state[i][j-k]=1;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::you(int &i, int &j)
+{
+    if(state[i][j+1]==2)
+    {
+
+          for(int upx=j+1;upx<=7;upx++)
+          {
+
+              if(state[i][upx]==0)
+                  break;
+              if(state[i][upx]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1;k<upx-j;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i][j+k]=new QLabel;
+                          label[i][j+k]->setPixmap(pix1);
+                          label[i][j+k]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i, j+k, label[i][j+k]);
+                          state[i][j+k]=1;
+                    }
+              }
+          }
+    }
+
+
+}
+
+int HBQ::zuoshang(int &i, int &j)
+{
+    if(state[i-1][j-1]==2)
+    {
+          for(int upx=i-1,upy=j-1;upx>=0,upy>=0;upx--,upy--)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<j-upy; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i-k][j-m]=new QLabel;
+                          label[i-k][j-m]->setPixmap(pix1);
+                          label[i-k][j-m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j-m, label[i-k][j-m]);
+                          state[i-k][j-m]=1;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::zuoxia(int &i, int &j)
+{
+    if(state[i+1][j-1]==2)
+    {
+          for(int upx=i+1,upy=j-1;upx<=7,upy>=0;upx++,upy--)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<j-upy; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i+k][j-m]=new QLabel;
+                          label[i+k][j-m]->setPixmap(pix1);
+                          label[i+k][j-m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j-m, label[i+k][j-m]);
+                          state[i+k][j-m]=1;
+                    }
+              }
+          }
+      }
+
+
+
+}
+
+int HBQ::youshang(int &i, int &j)
+{
+    if(state[i-1][j+1]==2)
+    {
+          for(int upx=i-1,upy=j+1;upx>=0,upy<=7;upx--,upy++)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<upy-j; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i-k][j+m]=new QLabel;
+                          label[i-k][j+m]->setPixmap(pix1);
+                          label[i-k][j+m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j+m, label[i-k][j+m]);
+                          state[i-k][j+m]=1;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::youxia(int &i, int &j)
+{
+    if(state[i+1][j+1]==2)
+    {
+          for(int upx=i+1,upy=j+1;upx<=7,upy<=7;upx++,upy++)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+                 // flag = 1;
+
+                  for(int k=1,m=1; k<upx-i,m<upy-j; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i+k][j+m]=new QLabel;
+                          label[i+k][j+m]->setPixmap(pix1);
+                          label[i+k][j+m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j+m, label[i+k][j+m]);
+                          state[i+k][j+m]=1;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::bshang(int &i, int &j)
+{
+
+    if(state[i-1][j]==1)
+    {
+
+          for(int upx=i-1;upx>=0;upx--)
+          {
+
+              if(state[upx][j]==0)
+                  break;
+              if(state[upx][j]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=2;
+                //  flag = 1;
+
+                  for(int k=1;k<i-upx;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i-k][j]=new QLabel;
+                          label[i-k][j]->setPixmap(pix1);
+                          label[i-k][j]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j, label[i-k][j]);
+                          state[i-k][j]=2;
+                    }
+              }
+          }
+      }
+}
+
+int HBQ::bxia(int &i, int &j)
+{
+    if(state[i+1][j]==1)
+    {
+
+          for(int upx=i+1;upx<=7;upx++)
+          {
+
+              if(state[upx][j]==0)
+                  break;
+              if(state[upx][j]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+
+                  state[i][j]=2;
+                //  flag = 1;
+
+                  for(int k=1;k<upx-i;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i+k][j]=new QLabel;
+                          label[i+k][j]->setPixmap(pix1);
+                          label[i+k][j]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j, label[i+k][j]);
+                          state[i+k][j]=2;
+                    }
+              }
+          }
+    }
+
+}
+
+int HBQ::bzuo(int &i, int &j)
+{
+    if(state[i][j-1]==1)
+    {
+          for(int upx=j-1;upx>=0;upx--)
+          {
+
+              if(state[i][upx]==0)
+                  break;
+              if(state[i][upx]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=2;
+                //  flag = 1;
+
+                  for(int k=1;k<j-upx;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i][j-k]=new QLabel;
+                          label[i][j-k]->setPixmap(pix1);
+                          label[i][j-k]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i, j-k, label[i][j-k]);
+                          state[i][j-k]=2;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::byou(int &i, int &j)
+{
+    if(state[i][j+1]==1)
+    {
+
+          for(int upx=j+1;upx<=7;upx++)
+          {
+
+              if(state[i][upx]==0)
+                  break;
+              if(state[i][upx]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+
+                  state[i][j]=2;
+              //    flag = 1;
+
+                  for(int k=1;k<upx-j;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i][j+k]=new QLabel;
+                          label[i][j+k]->setPixmap(pix1);
+                          label[i][j+k]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i, j+k, label[i][j+k]);
+                          state[i][j+k]=2;
+                    }
+              }
+          }
+    }
+
+
+
+}
+
+int HBQ::bzuoshang(int &i, int &j)
+{
+    if(state[i-1][j-1]==1)
+    {
+          for(int upx=i-1,upy=j-1;upx>=0,upy>=0;upx--,upy--)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=2;
+                //  flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<j-upy; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i-k][j-m]=new QLabel;
+                          label[i-k][j-m]->setPixmap(pix1);
+                          label[i-k][j-m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j-m, label[i-k][j-m]);
+                          state[i-k][j-m]=2;
+                    }
+              }
+          }
+      }
+
+
+}
+
+int HBQ::bzuoxia(int &i, int &j)
+{
+    if(state[i+1][j-1]==1)
+    {
+          for(int upx=i+1,upy=j-1;upx<=7,upy>=0;upx++,upy--)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=2;
+               //   flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<j-upy; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i+k][j-m]=new QLabel;
+                          label[i+k][j-m]->setPixmap(pix1);
+                          label[i+k][j-m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j-m, label[i+k][j-m]);
+                          state[i+k][j-m]=2;
+                    }
+              }
+          }
+      }
+
+
+}
+
+int HBQ::byoushang(int &i, int &j)
+{
+    if(state[i-1][j+1]==1)
+    {
+          for(int upx=i-1,upy=j+1;upx>=0,upy<=7;upx--,upy++)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+               //   flag = 1;
+
+                  for(int k=1,m=1; k<i-upx,m<upy-j; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i-k][j+m]=new QLabel;
+                          label[i-k][j+m]->setPixmap(pix1);
+                          label[i-k][j+m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j+m, label[i-k][j+m]);
+                          state[i-k][j+m]=1;
+                    }
+              }
+          }
+      }
+
+
+}
+
+int HBQ::byouxia(int &i, int &j)
+{
+    if(state[i+1][j+1]==1)
+    {
+          for(int upx=i+1,upy=j+1;upx<=7,upy<=7;upx++,upy++)
+          {
+
+              if(state[upx][upy]==0)
+                  break;
+              if(state[upx][upy]==2)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/white.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+              //    flag = 1;
+
+                  for(int k=1,m=1; k<upx-i,m<upy-j; k++,m++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/white.png");
+                          label[i+k][j+m]=new QLabel;
+                          label[i+k][j+m]->setPixmap(pix1);
+                          label[i+k][j+m]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i+k, j+m, label[i+k][j+m]);
+                          state[i+k][j+m]=1;
+                    }
+              }
+          }
+      }
+
+}
+
+int HBQ::shang(int &i, int &j)
+{
+    if(state[i-1][j]==2)
+    {
+          for(int upx=i-1;upx>=0;upx--)
+          {
+
+              if(state[upx][j]==0)
+                  break;
+              if(state[upx][j]==1)
+              {
+                  QPixmap pix;
+                  pix.load(":/image/black.png");
+                  label[i][j]=new QLabel;
+                  label[i][j]->setPixmap(pix);
+                  label[i][j]->setScaledContents(true);
+                  ui->tableWidget->setCellWidget(i, j, label[i][j]);
+                  state[i][j]=1;
+               //   flag = 1;
+
+                  for(int k=1;k<i-upx;k++)
+                  {
+
+                          QPixmap pix1;
+                          pix1.load(":/image/black.png");
+                          label[i-k][j]=new QLabel;
+                          label[i-k][j]->setPixmap(pix1);
+                          label[i-k][j]->setScaledContents(true);
+                          ui->tableWidget->setCellWidget(i-k, j, label[i-k][j]);
+                          state[i-k][j]=1;
+                    }
+              }
+          }
+      }
+
+
+
+}
+
+
+HBQ::~HBQ()
+{
+    delete ui;
+}

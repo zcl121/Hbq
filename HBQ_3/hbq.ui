@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HBQ</class>
+ <widget class="QWidget" name="HBQ">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>402</width>
+     <height>402</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-image: url(:/image/bg1.jpg);</string>
+   </property>
+   <property name="rowCount">
+    <number>8</number>
+   </property>
+   <property name="columnCount">
+    <number>8</number>
+   </property>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>50</number>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>50</number>
+   </attribute>
+   <attribute name="verticalHeaderMinimumSectionSize">
+    <number>50</number>
+   </attribute>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <column/>
+   <column/>
+   <column/>
+   <column/>
+   <column/>
+   <column/>
+   <column/>
+   <column/>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>500</width>
+     <height>500</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="margin">
+    <number>5</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>90</y>
+     <width>70</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 75 28pt &quot;Agency FB&quot;;
+color: rgb(0, 255, 255);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>310</y>
+     <width>70</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 75 28pt &quot;Agency FB&quot;;
+color: rgb(0, 255, 255);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_p1">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>100</y>
+     <width>50</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_p2">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>320</y>
+     <width>50</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
